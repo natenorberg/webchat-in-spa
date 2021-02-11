@@ -11,9 +11,11 @@
       if (routes.includes(path)) {
         console.log('loading chat');
 
+        // eslint-disable-next-line no-unused-vars
         var chat = window.Quiq({
           contactPoint: cp,
         });
+
         chatLoaded = true;
       }
     }
