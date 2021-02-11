@@ -11,17 +11,40 @@ const useCustomerField = (fieldId, value, submittedTime, chatLoaded) => {
   }, [value, fieldId, submittedTime, chatLoaded]);
 };
 
+const routes = ['/one', '/three'];
+
 const WebChat = ({firstName, lastName, phoneNumber, submittedTime}) => {
   const [chatLoaded, setChatLoaded] = useState(false);
 
-  useEffect(() => {
-    const {tenant = 'nate', cp = 'default'} = queryString.parse(window.location.search);
+  const {tenant = 'nate', cp = 'default'} = queryString.parse(window.location.search);
 
+  function loadChat() {
+    if (!chatLoaded) {
+      if (routes.includes(window.location.pathname)) {
+        console.log('loading chat');
+
+        chat = window.Quiq({
+          contactPoint: cp,
+        });
+        setChatLoaded(true);
+      }
+    }
+  }
+
+  useEffect(() => {
+    (function (history) {
+      var pushState = history.pushState;
+      history.pushState = function (state) {
+        loadChat();
+        return pushState.apply(history, arguments);
+      };
+    })(window.history);
+  }, []);
+
+  useEffect(() => {
     const script = document.createElement('script');
     script.onload = () => {
-      chat = window.Quiq({
-        contactPoint: cp,
-      });
+      loadChat();
     };
     script.src = `https://${tenant}.quiq-api.com/app/webchat/index.js`;
     document.head.appendChild(script);

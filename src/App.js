@@ -4,7 +4,7 @@ import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 import One from './One';
 import Two from './Two';
 import Three from './Three';
-import WebChat from './WebChat';
+import './quiqChatConfig';
 
 function App() {
   return (
@@ -32,7 +32,6 @@ function App() {
           </Route>
         </Switch>
       </div>
-      <WebChat />
     </Router>
   );
 }
