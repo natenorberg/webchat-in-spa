@@ -1,6 +1,6 @@
 (function () {
   var chat;
-  var tenant = 'nate';
+  // var tenant = 'nate';
   var cp = 'default';
   var routes = ['/one', '/three'];
 
