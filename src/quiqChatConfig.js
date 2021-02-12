@@ -3,50 +3,72 @@
   var tenant = 'nate';
   var cp = 'default';
   var routes = ['/one', '/three'];
+  var chatWasAvailable = false;
 
   var options = {
     contactPoint: cp,
   };
 
-  function loadChat() {
-    if (chat) {
-      chat.reinitialize(options);
-    } else {
-      chat = window.Quiq(options);
-    }
+  function isPathSupported(path) {
+    return routes.some((r) => path.includes(r));
   }
 
-  function unloadChat() {
+  function initialLoadChat() {
+    var pathSupported = isPathSupported(window.location.pathname);
+
+    chat = window.Quiq({
+      ...options,
+      allowNewConversation: pathSupported,
+    });
+    chat.getChatStatus().then((status) => {
+      chatWasAvailable = pathSupported || status.active;
+    });
+  }
+
+  function loadChat() {
+    if (!chatWasAvailable) {
+      chat.reinitialize({...options, allowNewConversation: true});
+    }
+
+    chatWasAvailable = true;
+  }
+
+  function hideChat() {
     if (chat) {
-      chat.reinitialize({
-        contactPoint: 'dont-show',
+      chat.getChatStatus().then((status) => {
+        if (!status.active && chatWasAvailable) {
+          chat.reinitialize({
+            ...options,
+            allowNewConversation: false,
+          });
+          chatWasAvailable = false;
+        }
       });
     }
   }
 
-  function checkPathForChat(path) {
-    if (routes.some((r) => path.includes(r))) {
+  function onPathChanged(path) {
+    if (isPathSupported(path)) {
       loadChat();
     } else {
-      unloadChat();
+      hideChat();
     }
   }
 
   const script = document.createElement('script');
   script.onload = () => {
-    checkPathForChat(window.location.pathname);
-
+    initialLoadChat();
     (function (history) {
       var pushState = history.pushState;
       history.pushState = function (state) {
         try {
-          checkPathForChat(arguments[2]);
+          onPathChanged(arguments[2]);
         } finally {
           return pushState.apply(history, arguments);
         }
       };
     })(window.history);
   };
-  script.src = `https://${tenant}.quiq-api.com/app/webchat/index.js`;
+  script.src = `https://nate.quiq.dev:3000/app/webchat/index.js`;
   document.head.appendChild(script);
 })();
