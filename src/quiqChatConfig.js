@@ -1,37 +1,49 @@
 (function () {
-  var chatLoaded = false;
+  var chat;
   var tenant = 'nate';
   var cp = 'default';
   var routes = ['/one', '/three'];
 
-  function loadChat(newPath) {
-    var path = newPath || window.location.pathname;
+  var options = {
+    contactPoint: cp,
+  };
 
-    if (!chatLoaded) {
-      if (routes.includes(path)) {
-        console.log('loading chat');
+  function loadChat() {
+    if (chat) {
+      chat.reinitialize(options);
+    } else {
+      chat = window.Quiq(options);
+    }
+  }
 
-        // eslint-disable-next-line no-unused-vars
-        var chat = window.Quiq({
-          contactPoint: cp,
-        });
+  function unloadChat() {
+    if (chat) {
+      chat.reinitialize({
+        contactPoint: 'dont-show',
+      });
+    }
+  }
 
-        chatLoaded = true;
-      }
+  function checkPathForChat(path) {
+    if (routes.some((r) => path.includes(r))) {
+      loadChat();
+    } else {
+      unloadChat();
     }
   }
 
   const script = document.createElement('script');
   script.onload = () => {
-    loadChat();
+    checkPathForChat(window.location.pathname);
 
     (function (history) {
       var pushState = history.pushState;
       history.pushState = function (state) {
-        console.log(arguments);
-
-        loadChat(arguments[2]);
-        return pushState.apply(history, arguments);
+        try {
+          checkPathForChat(arguments[2]);
+        } finally {
+          return pushState.apply(history, arguments);
+        }
       };
     })(window.history);
   };
