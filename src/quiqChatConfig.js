@@ -2,14 +2,24 @@
   var chat;
   var tenant = 'nate';
   var cp = 'default';
-  var routes = ['/one', '/three'];
+  var routes = [];
   var chatWasAvailable = false;
+
+  fetch('/supported-routes.txt')
+    .then((resp) => resp.text())
+    .then((result) => {
+      routes = result.split('\n');
+    });
 
   var options = {
     contactPoint: cp,
+    customLaunchButtons: ['.StartQuiqChat'],
+    showDefaultLaunchButton: true,
   };
 
   function isPathSupported(path) {
+    console.log(routes);
+
     return routes.some((r) => path.includes(r));
   }
 
