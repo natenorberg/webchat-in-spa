@@ -2,12 +2,20 @@
   var chat;
 
   // Configuration variables
-  var tenant = "bbb-test";
-  var cp = "webtest";
+  var tenant = "nate";
+  var cp = "default";
   // This is the list of keywords to show webchat for
   // We can set this up to load from an external source if needed
-  var routes = ["knowledgecenter"];
+  var routes = ["one", "three"];
 
+  // // Configuration variables
+  // var tenant = "bbb-test";
+  // var cp = "webtest";
+  // // This is the list of keywords to show webchat for
+  // // We can set this up to load from an external source if needed
+  // var routes = ["knowledgecenter"];
+
+  var chatHasLoaded = false;
   var chatWasAvailable = false;
 
   var options = {
@@ -74,28 +82,42 @@
     }
   }
 
+  function loadScriptsFromQuiq(onLoad) {
+    const script = document.createElement("script");
+    script.onload = function () {
+      initialLoadChat();
+    };
+    script.src = "https://" + tenant + ".quiq-api.com/app/webchat/index.js";
+    document.head.appendChild(script);
+    chatHasLoaded = true;
+  }
+
   function onPathChanged(path) {
     if (isPathSupported(path)) {
-      loadChat();
+      if (!chatHasLoaded) {
+        loadScriptsFromQuiq();
+      } else {
+        loadChat();
+      }
     } else {
       hideChat();
     }
   }
 
-  const script = document.createElement("script");
-  script.onload = function () {
-    initialLoadChat();
-    (function (history) {
-      var pushState = history.pushState;
-      history.pushState = function (state) {
-        try {
-          onPathChanged(arguments[2]);
-        } finally {
-          return pushState.apply(history, arguments);
-        }
-      };
-    })(window.history);
-  };
-  script.src = "https://" + tenant + ".quiq-api.com/app/webchat/index.js";
-  document.head.appendChild(script);
+  // Subscribe to path change event
+  (function (history) {
+    var pushState = history.pushState;
+    history.pushState = function (state) {
+      try {
+        onPathChanged(arguments[2]);
+      } finally {
+        return pushState.apply(history, arguments);
+      }
+    };
+  })(window.history);
+
+  // Load chat if we're already on a supported page
+  if (isPathSupported(window.location.pathname)) {
+    loadScriptsFromQuiq();
+  }
 })();
