@@ -79,6 +79,6 @@
       };
     })(window.history);
   };
-  script.src = `https://${tenant}.quiq-api.com/app/webchat/index.js`;
+  script.src = `https://${tenant}.quiq-api.com/app/webchat/v2/index.js`;
   document.head.appendChild(script);
 })();
