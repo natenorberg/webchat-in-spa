@@ -29,6 +29,12 @@
     chat = window.Quiq({
       ...options,
       allowNewConversation: pathSupported,
+      seo: {
+        delayScriptLoad: {
+          enabled: true,
+          delay: 2000
+        }
+      }
     });
     chat.getChatStatus().then((status) => {
       chatWasAvailable = pathSupported || status.active;
@@ -49,7 +55,7 @@
         if (!status.active && chatWasAvailable) {
           chat.reinitialize({
             ...options,
-            allowNewConversation: false,
+            allowNewConversation: false
           });
           chatWasAvailable = false;
         }
