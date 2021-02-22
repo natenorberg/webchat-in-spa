@@ -49,9 +49,16 @@
 
     chat = window.Quiq(
       Object.assign({}, options, {
-        allowNewConversation: pathSupported
+        allowNewConversation: pathSupported,
+        seo: {
+          delayScriptLoad: {
+            enabled: true,
+            delay: 2000
+          }
+        }
       })
     );
+    
     chat.getChatStatus().then(function (status) {
       chatWasAvailable = pathSupported || status.active;
     });
@@ -87,7 +94,7 @@
     script.onload = function () {
       initialLoadChat();
     };
-    script.src = "https://" + tenant + ".quiq-api.com/app/webchat/index.js";
+    script.src = "https://" + tenant + ".quiq-api.com/app/webchat/v2/index.js";
     document.head.appendChild(script);
     chatHasLoaded = true;
   }
